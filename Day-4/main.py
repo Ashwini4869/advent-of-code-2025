@@ -41,20 +41,43 @@ def is_accessible(paper_roll_position, total_rows, total_cols, grid):
         return False
 
 
-def walk_grid(grid):
-    total_accessible_paper_rolls = 0
+def get_accessible_rolls(grid):
     total_columns = len(grid[0])
     total_rows = len(grid)
+    accessible_rolls = []
+
     for i in range(len(grid)):
         for j in range(len(grid[i])):
             if grid[i][j] == "@":
                 if is_accessible((i, j), total_rows, total_columns, grid):
-                    total_accessible_paper_rolls += 1
+                    accessible_rolls.append((i, j))
 
-    return total_accessible_paper_rolls
+    return accessible_rolls
+
+
+def remove_accessible_rolls(grid, accessible_rolls):
+    for roll in accessible_rolls:
+        i, j = roll
+        grid[i][j] = "x"
+    return grid
+
+
+def remove_accessible_rolls_recursively(grid):
+    total_removed_rolls_count = 0
+
+    while True:
+        accessible_rolls = get_accessible_rolls(grid)
+        if len(accessible_rolls) != 0:
+            total_removed_rolls_count += len(accessible_rolls)
+            grid = remove_accessible_rolls(grid, accessible_rolls)
+
+        else:
+            break
+
+    return total_removed_rolls_count
 
 
 if __name__ == "__main__":
     grid = parse_grid_file("input.txt")
-    total_accessible_paper_rolls = walk_grid(grid)
-    print(f"The total count of paper rolls are: {total_accessible_paper_rolls}")
+    total_removed_rolls_count = remove_accessible_rolls_recursively(grid)
+    print(f"Total removed rolls : {total_removed_rolls_count}")
