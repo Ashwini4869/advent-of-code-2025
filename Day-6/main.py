@@ -10,14 +10,53 @@ def parse_problem_file(filename: str):
     lines.pop()
 
     for i in range(len(lines)):
-        lines[i] = lines[i].strip("\n ").split(" ")
+        lines[i] = list(lines[i].strip("\n"))
 
     for i in range(len(lines)):
         lines[i] = [item for item in lines[i] if item]
 
     operands_list = [list(row) for row in zip(*lines)]
     operator_list = [item for item in operator_list if item]
-    return (operands_list, operator_list)
+
+    operands_list_vertical = []
+
+    for item in operands_list:
+        max_length = len(max(item, key=len))
+
+        # Append zeros to make all the strings of same size
+        for i, sub_item in enumerate(item):
+            current_element_length = len(sub_item)
+            if current_element_length != max_length:
+                num_zeros_to_append = max_length - current_element_length
+                item[i] = "0" * num_zeros_to_append + sub_item
+
+        temp_list = []
+        for i in range(max_length - 1, -1, -1):
+            column_number = ""
+            for sub_item in item:
+                try:
+                    if sub_item[i] is not None:
+                        column_number += sub_item[i]
+                except IndexError:
+                    pass
+            temp_list.append(column_number)
+        operands_list_vertical.append(temp_list)
+
+    # Final Operands List
+    operands_vertical_filtered = []
+
+    temp_list = []
+    for i, item in enumerate(operands_list_vertical):
+        if len(item[0].strip()) == 0:
+            operands_vertical_filtered.append(temp_list)
+            temp_list = []
+        elif i == len(operands_list_vertical) - 1:
+            temp_list.append(item[0].strip())
+            operands_vertical_filtered.append(temp_list)
+        else:
+            temp_list.append(item[0].strip())
+
+    return (operands_vertical_filtered, operator_list)
 
 
 def perform_operation(operand_list, operator) -> int:
